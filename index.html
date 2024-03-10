@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>邮资计算器</title>
+
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+	<!-- <link href="https://cdn.staticfile.org/font-awesome/6.4.2/css/all.min.css" rel="stylesheet"> -->
+	<link href="https://cdn.staticfile.org/bootstrap/5.3.2/css/bootstrap.css" rel="stylesheet">
+	<script src="https://cdn.staticfile.org/bootstrap/5.3.2/js/bootstrap.bundle.js"></script>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+	<div class="container-md pt-3 pb-5">
+		<h1 class="mt-5">邮资计算器</h1>
+		<hr>
+		<div class="row mt-3">
+			<div class="btn-group" role="group" aria-label="选择业务种类">
+				<input type="radio" id="letter" name="service" class="btn-check" value="letter" onchange="updateRate()"
+					checked>
+				<label for="letter" class="btn btn-outline-primary">信函</label>
+
+				<input type="radio" id="print" name="service" class="btn-check" value="print" onchange="updateRate()">
+				<label for="print" class="btn btn-outline-primary">印刷品</label>
+			</div>
+		</div>
+
+		<div class="row mt-3">
+			<div class="btn-group" role="group" aria-label="地区">
+				<input type="radio" id="local" name="area" class="btn-check" value="local" onchange="updateRate()">
+				<label for="local" class="btn btn-outline-primary">本埠</label>
+
+				<input type="radio" id="outgoing" name="area" class="btn-check" value="outgoing" onchange="updateRate()"
+					checked>
+				<label for="outgoing" class="btn btn-outline-primary">外埠</label>
+			</div>
+		</div>
+
+		<div class="row mt-3">
+			<label for="weight" class="form-label">输入重量（克）：</label>
+			<input type="number" id="weight" name="weight" class="form-control" oninput="updateRate()" required>
+		</div>
+
+		<div class="row mt-3">
+			<div class="form-check">
+				<input type="checkbox" id="registered" name="registered" class="form-check-input"
+					oninput="updateRate()">
+				<label for="registered" class="form-check-label">是否挂号</label>
+			</div>
+		</div>
+
+		<div class="row mt-3">
+			<h3>计算结果：</h3>
+			<p id="result"></p>
+		</div>
+	</div>
+
+	<script>
+		var rates = {
+			letter: { local: { 首重: 0.8, 续重: 1.2 }, outgoing: { 首重: 1.2, 续重: 2 } },
+			print: { local: { 首重: 0.8, 续重: 0.2 }, outgoing: { 首重: 1.2, 续重: 0.4 } },
+		};
+		function updateRate() {
+			var service = document.querySelector('input[name="service"]:checked').value;
+			var area = document.querySelector('input[name="area"]:checked').value;
+			var weight = document.getElementById("weight").value;
+			var registered = document.getElementById("registered").checked;
+			var rate = calculateRate(service, weight, area, registered, rates);
+			document.getElementById("result").innerHTML =
+				"邮资为：" + rate.toFixed(2) + "元";
+		}
+		function calculateRate(service, weight, area, registered, rates) {
+			var rate = 0;
+			if (weight != 0) {
+				console.log(service)
+				if (weight <= 100) {
+					if (service === "letter") {
+						rate = rates[service][area]["首重"] * Math.ceil(weight / 20) / 2;
+					} else {
+						rate = rates[service][area]["首重"];
+					}
+				} else {
+					if (service === "letter") {
+						rate =
+							rates[service][area]["首重"] * 5 +
+							Math.ceil((weight - 100) / 20) * rates[service][area]["续重"];
+					} else {
+						rate =
+							rates[service][area]["首重"] + Math.ceil((weight - 100) / 100) * rates[service][area]["续重"];
+					}
+				}
+				if (registered) {
+					rate += 3;
+				}
+			}
+			return rate;
+		}
+
+		updateRate();
+
+	</script>
+	</div>
+</body>
+
+</html>
