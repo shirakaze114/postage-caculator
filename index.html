@@ -86,7 +86,7 @@
 					if (service === "letter") {
 						rate =
 							rates[service][area]["首重"] * 5 +
-							Math.ceil((weight - 100) / 20) * rates[service][area]["续重"];
+							Math.ceil((weight - 100) / 100) * rates[service][area]["续重"];
 					} else {
 						rate =
 							rates[service][area]["首重"] + Math.ceil((weight - 100) / 100) * rates[service][area]["续重"];
