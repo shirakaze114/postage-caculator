@@ -78,7 +78,7 @@
 				console.log(service)
 				if (weight <= 100) {
 					if (service === "letter") {
-						rate = rates[service][area]["首重"] * Math.ceil(weight / 20) / 2;
+						rate = rates[service][area]["首重"] * Math.ceil(weight / 20);
 					} else {
 						rate = rates[service][area]["首重"];
 					}
