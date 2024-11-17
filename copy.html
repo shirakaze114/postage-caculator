@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL</title>
+    <style>
+        #url {
+            margin-bottom: 10px;
+            width: 80%;
+            padding: 5px;
+            font-size: 16px;
+        }
+        #copyButton {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #copyButton:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h2>URL:</h2>
+    <input type="text" id="url" value="" readonly>
+    <button id="copyButton">Copy URL</button>
+    
+    <script>
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        document.getElementById('url').value = getUrlParameter('url');
+
+        document.getElementById('copyButton').onclick = function() {
+            const url = document.getElementById('url');
+            url.select(); // Select text
+            document.execCommand('copy'); // Copy text
+            alert('已复制到剪贴板！去浏览器打开。');
+        };
+    </script>
+</body>
+</html>
