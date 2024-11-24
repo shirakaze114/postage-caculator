@@ -7,8 +7,14 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 	<!-- <link href="https://cdn.staticfile.org/font-awesome/6.4.2/css/all.min.css" rel="stylesheet"> -->
-	<link href="https://cdn.staticfile.org/bootstrap/5.3.2/css/bootstrap.css" rel="stylesheet">
-	<script src="https://cdn.staticfile.org/bootstrap/5.3.2/js/bootstrap.bundle.js"></script>
+	<!-- <link href="https://cdn.staticfile.org/bootstrap/5.3.2/css/bootstrap.css" rel="stylesheet">
+	<script src="https://cdn.staticfile.org/bootstrap/5.3.2/js/bootstrap.bundle.js"></script> -->
+	<link type="text/css" rel="stylesheet" href="https://cdnjs.webstatic.cn/ajax/libs/bootstrap/5.3.3/css/bootstrap.css"
+		integrity="sha512-VcyUgkobcyhqQl74HS1TcTMnLEfdfX6BbjhH8ZBjFU9YTwHwtoRtWSGzhpDVEJqtMlvLM2z3JIixUOu63PNCYQ=="
+		crossorigin="anonymous">
+	<script src="https://cdnjs.webstatic.cn/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"
+		integrity="sha512-7Pi/otdlbbCR+LnW+F7PwFcSDJOuUJB3OxtEHbg4vSMvzvJjde4Po1v4BR9Gdc9aXNUNFVUY+SK51wWT8WF0Gg=="
+		crossorigin="anonymous"></script>
 
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
@@ -17,89 +23,328 @@
 	<div class="container-md pt-3 pb-5">
 		<h1 class="mt-5">邮资计算器</h1>
 		<hr>
-		<div class="row mt-3">
+		<!-- <div class="row mt-3">
 			<div class="btn-group" role="group" aria-label="选择业务种类">
-				<input type="radio" id="letter" name="service" class="btn-check" value="letter" onchange="updateRate()"
+				<input type="radio" id="letter" name="service" class="btn-check" value="letter" onchange="update()"
 					checked>
 				<label for="letter" class="btn btn-outline-primary">信函</label>
 
-				<input type="radio" id="print" name="service" class="btn-check" value="print" onchange="updateRate()">
+				<input type="radio" id="print" name="service" class="btn-check" value="print" onchange="update()">
 				<label for="print" class="btn btn-outline-primary">印刷品</label>
 			</div>
-		</div>
+		</div> -->
 
 		<div class="row mt-3">
 			<div class="btn-group" role="group" aria-label="地区">
-				<input type="radio" id="local" name="area" class="btn-check" value="local" onchange="updateRate()">
+				<input type="radio" id="local" name="area" class="btn-check" value="local" onchange="update()">
 				<label for="local" class="btn btn-outline-primary">本埠</label>
 
-				<input type="radio" id="outgoing" name="area" class="btn-check" value="outgoing" onchange="updateRate()"
+				<input type="radio" id="outgoing" name="area" class="btn-check" value="outgoing" onchange="update()"
 					checked>
 				<label for="outgoing" class="btn btn-outline-primary">外埠</label>
 			</div>
 		</div>
 
 		<div class="row mt-3">
-			<label for="weight" class="form-label">输入重量（克）：</label>
-			<input type="number" id="weight" name="weight" class="form-control" oninput="updateRate()" required>
+			<div class="col">
+				<select id="local-package-area" class="form-select" aria-label="寄出省" onchange="update()">
+					<option value="-1" selected>-- 请选择所属省份 --</option>
+					<option value="1">除新疆、西藏、内蒙古和青海以外所有省份</option>
+					<option value="2">新疆、西藏、内蒙古和青海四省、自治区</option>
+				</select>
+			</div>
 		</div>
 
+		<div class="row mt-3" id="province-row">
+			<div class="col">
+				<select id="send-province" class="form-select" aria-label="寄出省" onchange="update()">
+					<option value="-1" selected>-- 请选择寄出省、直辖市、自治区 --</option>
+				</select>
+			</div>
+			<div class="col">
+				<select id="arrive-province" class="form-select" aria-label="到达省" onchange="update()">
+					<option value="-1" selected>-- 请选择到达省、直辖市、自治区 --</option>
+				</select>
+			</div>
+		</div>
+
+
 		<div class="row mt-3">
-			<div class="form-check">
-				<input type="checkbox" id="registered" name="registered" class="form-check-input"
-					oninput="updateRate()">
-				<label for="registered" class="form-check-label">是否挂号</label>
+			<div class="col">
+				<label for="weight" class="form-label">输入重量（克）：</label>
+				<input type="number" id="weight" name="weight" class="form-control" oninput="update()" required>
 			</div>
 		</div>
 
 		<div class="row mt-3">
-			<h3>计算结果：</h3>
-			<p id="result"></p>
+			<div class="col">
+				<div class="form-check">
+					<input type="checkbox" id="registered" name="registered" class="form-check-input"
+						oninput="update()">
+					<label for="registered" class="form-check-label">函件是否挂号</label>
+				</div>
+			</div>
+		</div>
+
+		<div class="row mt-3">
+			<div class="col">
+				<h3>计算结果：</h3>
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th scope="col">业务种类</th>
+							<th scope="col">资费档</th>
+							<th scope="col">邮资</th>
+						</tr>
+					</thead>
+					<tbody id="result-table-body">
+					</tbody>
+				</table>
+			</div>
+			<!-- <p id="result"></p> -->
 		</div>
 	</div>
 
 	<script>
-		var rates = {
-			letter: { local: { 首重: 0.8, 续重: 1.2 }, outgoing: { 首重: 1.2, 续重: 2 } },
-			print: { local: { 首重: 0.8, 续重: 0.2 }, outgoing: { 首重: 1.2, 续重: 0.4 } },
-		};
-		function updateRate() {
-			var service = document.querySelector('input[name="service"]:checked').value;
-			var area = document.querySelector('input[name="area"]:checked').value;
-			var weight = document.getElementById("weight").value;
-			var registered = document.getElementById("registered").checked;
-			var rate = calculateRate(service, weight, area, registered, rates);
-			document.getElementById("result").innerHTML =
-				"邮资为：" + rate.toFixed(2) + "元";
-		}
-		function calculateRate(service, weight, area, registered, rates) {
-			var rate = 0;
-			if (weight != 0) {
-				console.log(service)
-				if (weight <= 100) {
-					if (service === "letter") {
-						rate = rates[service][area]["首重"] * Math.ceil(weight / 20);
-					} else {
-						rate = rates[service][area]["首重"];
-					}
-				} else {
-					if (service === "letter") {
-						rate =
-							rates[service][area]["首重"] * 5 +
-							Math.ceil((weight - 100) / 100) * rates[service][area]["续重"];
-					} else {
-						rate =
-							rates[service][area]["首重"] + Math.ceil((weight - 100) / 100) * rates[service][area]["续重"];
-					}
-				}
-				if (registered) {
-					rate += 3;
-				}
-			}
-			return rate;
+		let provinces = ["安徽省", "北京市", "重庆市", "福建省", "甘肃省", "广东省", "广西壮族自治区", "贵州省", "海南省", "河北省", "河南省", "黑龙江省", "湖北省", "湖南省",
+			"吉林省", "江苏省", "江西省", "辽宁省", "内蒙古自治区", "宁夏回族自治区", "青海省", "山东省", "山西省", "陕西省", "上海市", "四川省", "天津市", "西藏自治区",
+			"新疆维吾尔自治区", "云南省", "浙江省"];
+
+		let numToChs = ["", "一档", "二档", "三档", "四档", "五档", "六档"];
+		// 向寄出省下拉框中添加选项
+		let sendProvinceSelect = document.getElementById("send-province");
+		for (let i = 0; i < provinces.length; i++) {
+			let option = document.createElement("option");
+			option.value = i;
+			option.text = provinces[i];
+			sendProvinceSelect.add(option);
 		}
 
-		updateRate();
+		// 向到达省下拉框中添加选项以及值
+		let arriveProvinceSelect = document.getElementById("arrive-province");
+		for (let i = 0; i < provinces.length; i++) {
+			let option = document.createElement("option");
+			option.value = i;
+			option.text = provinces[i];
+			arriveProvinceSelect.add(option);
+		}
+
+		let provinceToArea = [
+			[1, 4, 4, 3, 4, 4, 4, 4, 4, 3, 2, 5, 2, 3, 4, 2, 2, 4, 4, 4, 4, 2, 3, 3, 2, 4, 3, 6, 6, 5, 2],
+			[4, 1, 4, 4, 4, 5, 5, 5, 5, 2, 3, 4, 4, 4, 3, 3, 4, 3, 2, 4, 4, 2, 3, 3, 4, 4, 2, 6, 6, 5, 4],
+			[4, 4, 1, 4, 4, 4, 3, 2, 4, 4, 4, 5, 2, 2, 5, 4, 4, 5, 4, 4, 4, 4, 4, 2, 4, 2, 4, 5, 6, 3, 4],
+			[3, 4, 4, 1, 5, 2, 4, 4, 4, 4, 4, 5, 3, 3, 5, 3, 2, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 6, 6, 5, 2],
+			[4, 4, 4, 5, 1, 5, 5, 4, 5, 4, 4, 5, 4, 4, 5, 4, 4, 5, 2, 2, 2, 4, 3, 3, 3, 2, 4, 5, 2, 4, 4],
+			[4, 5, 4, 2, 5, 1, 2, 4, 2, 4, 4, 6, 3, 2, 6, 4, 2, 5, 5, 5, 5, 4, 4, 4, 4, 4, 5, 6, 6, 4, 4],
+			[4, 5, 3, 4, 5, 2, 1, 2, 2, 5, 4, 6, 4, 2, 6, 4, 4, 5, 5, 5, 5, 5, 5, 4, 4, 4, 5, 6, 6, 2, 4],
+			[4, 5, 2, 4, 4, 4, 2, 1, 4, 4, 4, 6, 4, 2, 6, 4, 4, 5, 5, 4, 4, 4, 4, 5, 4, 2, 5, 6, 6, 2, 4],
+			[4, 5, 4, 4, 5, 2, 2, 4, 1, 5, 5, 6, 4, 4, 6, 4, 4, 6, 5, 5, 5, 5, 5, 5, 5, 4, 5, 6, 6, 4, 4],
+			[3, 2, 4, 4, 4, 4, 5, 4, 5, 1, 2, 4, 3, 4, 4, 3, 4, 2, 2, 3, 4, 2, 2, 4, 4, 4, 2, 6, 5, 5, 4],
+			[2, 3, 4, 4, 4, 4, 4, 4, 5, 2, 1, 4, 2, 3, 4, 3, 3, 4, 3, 4, 4, 2, 2, 2, 3, 4, 3, 6, 6, 5, 3],
+			[5, 4, 5, 5, 5, 6, 6, 6, 6, 4, 4, 1, 5, 5, 2, 5, 5, 3, 2, 5, 5, 4, 4, 4, 5, 4, 4, 6, 6, 6, 5],
+			[2, 4, 2, 3, 4, 3, 4, 4, 4, 3, 2, 5, 1, 2, 5, 3, 2, 4, 4, 4, 4, 3, 3, 3, 3, 4, 4, 6, 6, 4, 3],
+			[3, 4, 2, 3, 4, 2, 2, 2, 4, 4, 3, 5, 2, 1, 5, 3, 2, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 6, 4, 3],
+			[4, 3, 5, 5, 5, 6, 6, 6, 6, 4, 4, 2, 5, 5, 1, 4, 5, 2, 2, 5, 5, 4, 4, 4, 4, 5, 3, 6, 6, 6, 5],
+			[2, 3, 4, 3, 4, 4, 4, 4, 4, 3, 3, 5, 3, 3, 4, 1, 3, 4, 4, 4, 4, 2, 4, 4, 2, 4, 3, 6, 6, 5, 2],
+			[2, 4, 4, 2, 4, 2, 4, 4, 4, 4, 3, 5, 2, 2, 5, 3, 1, 5, 4, 4, 4, 4, 4, 4, 3, 4, 4, 6, 6, 4, 2],
+			[4, 3, 5, 5, 5, 5, 5, 5, 6, 2, 4, 3, 4, 5, 2, 4, 5, 1, 2, 4, 5, 3, 4, 4, 4, 5, 3, 6, 6, 6, 4],
+			[4, 2, 4, 5, 2, 5, 5, 5, 5, 2, 3, 2, 4, 4, 2, 4, 4, 2, 2, 2, 4, 3, 2, 2, 4, 4, 3, 6, 5, 5, 4],
+			[4, 4, 4, 5, 2, 5, 5, 4, 5, 3, 4, 5, 4, 4, 5, 4, 4, 4, 2, 1, 3, 4, 3, 2, 4, 4, 4, 5, 5, 5, 4],
+			[4, 4, 4, 5, 2, 5, 5, 4, 5, 4, 4, 5, 4, 4, 5, 4, 4, 5, 4, 3, 2, 4, 4, 3, 5, 2, 4, 2, 2, 4, 5],
+			[2, 2, 4, 4, 4, 4, 5, 4, 5, 2, 2, 4, 3, 4, 4, 2, 4, 3, 3, 4, 4, 1, 3, 3, 3, 4, 2, 6, 6, 5, 3],
+			[3, 3, 4, 4, 3, 4, 5, 4, 5, 2, 2, 4, 3, 4, 4, 4, 4, 4, 2, 3, 4, 3, 1, 2, 4, 4, 3, 6, 5, 5, 4],
+			[3, 3, 2, 4, 3, 4, 4, 5, 5, 4, 2, 4, 3, 4, 4, 4, 4, 4, 2, 2, 3, 3, 2, 1, 4, 2, 4, 5, 5, 4, 4],
+			[2, 4, 4, 4, 3, 4, 4, 4, 5, 4, 3, 5, 3, 4, 4, 2, 3, 4, 4, 4, 5, 3, 4, 4, 1, 4, 4, 6, 6, 5, 2],
+			[4, 4, 2, 4, 2, 4, 4, 2, 4, 4, 4, 4, 4, 4, 5, 4, 4, 5, 4, 4, 2, 4, 4, 2, 4, 1, 4, 2, 5, 2, 4],
+			[3, 2, 4, 4, 4, 5, 5, 5, 5, 2, 3, 4, 4, 4, 3, 3, 4, 3, 3, 4, 4, 2, 3, 4, 4, 4, 1, 6, 6, 5, 4],
+			[6, 6, 5, 6, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 2, 6, 6, 5, 6, 2, 6, 2, 2, 2, 6],
+			[6, 6, 6, 6, 2, 6, 6, 6, 6, 5, 6, 6, 6, 6, 6, 6, 6, 6, 5, 5, 2, 6, 5, 5, 6, 5, 6, 2, 2, 6, 6],
+			[5, 5, 3, 5, 4, 4, 2, 2, 4, 5, 5, 6, 4, 4, 6, 5, 4, 6, 5, 5, 4, 5, 5, 4, 5, 2, 5, 2, 6, 1, 5],
+			[2, 4, 4, 2, 4, 4, 4, 4, 4, 4, 3, 5, 3, 3, 5, 2, 2, 4, 4, 4, 5, 3, 4, 4, 2, 4, 4, 6, 6, 5, 1],
+		];
+
+		let mail_rates = {
+			letter: { local: { first: 0.8, addition: 1.2 }, outgoing: { first: 1.2, addition: 2 } },
+			print: { local: { first: 0.8, addition: 0.2 }, outgoing: { first: 1.2, addition: 0.4 } },
+		};
+
+		// 邮政普通包裹寄递服务资费上限标准
+		// https://www.gov.cn/xinwen/2017-04/12/5185269/files/103de7c2c15e465e9a07dcf6fd90e2c2.pdf
+		// 但是
+		// 去问客服 客服说
+		// 二档 首重1kg是6元，10kg-20kg（含）是每续重1kg2元
+		// 六档
+		let package_rates = {
+			1: { first: 5, addition: 2 },
+			// 1: { first: 5, addition: 2 },
+			// 2: { first: 6, addition: 1.5 },
+			2: { first: 6, addition: 2 },
+			3: { first: 7, addition: 2 },
+			4: { first: 8, addition: 3 },
+			5: { first: 9, addition: 4 },
+			// 6: { first: 10, addition: 5 },
+			6: { first: 10, addition: 7 },
+		}
+
+		function update() {
+			var area = document.querySelector('input[name="area"]:checked').value;
+
+			// 使得下拉框不显示
+			if (area === "local") {
+				document.getElementById("local-package-area").style.display = "flex";
+				document.getElementById("province-row").style.display = "none";
+			} else {
+				document.getElementById("province-row").style.display = "flex";
+				document.getElementById("local-package-area").style.display = "none";
+			}
+
+			var weight = document.getElementById("weight").value;
+			var registered = document.getElementById("registered").checked;
+
+			// initalize the table
+			var tbody = document.getElementById("result-table-body");
+			tbody.innerHTML = "";
+
+
+			insertToTable("国内信函", get_mail_type("letter", area, registered), letter_fee(weight, area, registered).toFixed(2));
+			insertToTable("国内印刷品", get_mail_type("print", area, registered), printing_fee(weight, area, registered).toFixed(2));
+
+			if (area == "outgoing") {
+				var package_area = provinceToArea[document.getElementById("arrive-province").value] == undefined ? "-" : numToChs[provinceToArea[document.getElementById("arrive-province").value][document.getElementById("send-province").value]];
+				var package_postage = package_fee(weight, document.getElementById("send-province").value, document.getElementById("arrive-province").value);
+			} else {
+				var package_area = document.getElementById("local-package-area").value == -1 ? "-" : numToChs[document.getElementById("local-package-area").value];
+				var package_postage = package_area_fee(weight, document.getElementById("local-package-area").value);
+			}
+
+			insertToTable("国内普通包裹", package_area, package_postage);
+
+
+			// var rate = calculateRate(service, weight, area, registered, mail_rates);
+			// document.getElementById("result").innerHTML =
+			// 	"邮资为：" + rate.toFixed(2) + "元";
+		}
+
+		function insertToTable(service, area, postage) {
+			var tbody = document.getElementById("result-table-body");
+			var tr = document.createElement("tr");
+			var td1 = document.createElement("td");
+			var td2 = document.createElement("td");
+			var td3 = document.createElement("td");
+			td1.innerHTML = service;
+			td2.innerHTML = area;
+			td3.innerHTML = postage;
+			tr.appendChild(td1);
+			tr.appendChild(td2);
+			tr.appendChild(td3);
+			tbody.appendChild(tr);
+		}
+
+
+		function get_mail_type(service, area, registered) {
+			let areaText = area == "local" ? "本埠" : "外埠";
+			let registeredText = registered ? "挂号" : "平常";
+			let serviceText = service == "letter" ? "信函" : "印刷品";
+			return areaText + registeredText + serviceText;
+		}
+
+		function printing_fee(weight, area, registered) {
+			var fee = 0;
+			if (weight != 0) {
+				if (weight <= 100) {
+					fee = mail_rates["print"][area]["first"];
+				} else {
+					fee =
+						mail_rates["print"][area]["first"] + Math.ceil((weight - 100) / 100) * mail_rates["print"][area]["addition"];
+				}
+				if (registered) {
+					fee += 3;
+				}
+			}
+			return fee;
+		}
+
+		function letter_fee(weight, area, registered) {
+			var fee = 0;
+			if (weight != 0) {
+				if (weight <= 100) {
+					fee = mail_rates["letter"][area]["first"] * Math.ceil(weight / 20);
+				} else {
+					fee =
+						mail_rates["letter"][area]["first"] * 5 +
+						Math.ceil((weight - 100) / 100) * mail_rates["letter"][area]["addition"];
+				}
+				if (registered) {
+					fee += 3;
+				}
+			}
+			return fee;
+		}
+
+		function package_fee(weight, sender, recipient) {
+			if (sender == -1 || recipient == -1) {
+				return "请选择寄出地和到达地<br>以计算包裹资费";
+			}
+			var fee = 0;
+			let rate_reference = package_rates[provinceToArea[sender][recipient]];
+			if (weight != 0) {
+				if (weight <= 1000) {
+					fee = rate_reference["first"];
+				} else {
+					fee =
+						rate_reference["first"] +
+						Math.ceil((weight - 1000) / 1000) * rate_reference["addition"];
+				}
+			}
+			return fee.toFixed(2);
+		}
+
+		function package_area_fee(weight, area) {
+			if (area == -1) {
+				return "请选择寄递区<br>以计算包裹资费";
+			}
+			var fee = 0;
+			let rate_reference = package_rates[area];
+			if (weight != 0) {
+				if (weight <= 1000) {
+					fee = rate_reference["first"];
+				} else {
+					fee =
+						rate_reference["first"] +
+						Math.ceil((weight - 1000) / 1000) * rate_reference["addition"];
+				}
+			}
+			return fee.toFixed(2);
+		}
+
+		// function calculateRate(service, weight, area, registered, mail_rates) {
+		// 	var rate = 0;
+		// 	if (weight != 0) {
+		// 		console.log(service)
+		// 		if (weight <= 100) {
+		// 			if (service === "letter") {
+		// 				rate = mail_rates[service][area]["first"] * Math.ceil(weight / 20);
+		// 			} else {
+		// 				rate = mail_rates[service][area]["first"];
+		// 			}
+		// 		} else {
+		// 			if (service === "letter") {
+		// 				rate =
+		// 					mail_rates[service][area]["first"] * 5 +
+		// 					Math.ceil((weight - 100) / 100) * mail_rates[service][area]["addition"];
+		// 			} else {
+		// 				rate =
+		// 					mail_rates[service][area]["first"] + Math.ceil((weight - 100) / 100) * mail_rates[service][area]["addition"];
+		// 			}
+		// 		}
+		// 		if (registered) {
+		// 			rate += 3;
+		// 		}
+		// 	}
+		// 	return rate;
+		// }
+
+		update();
 
 	</script>
 	</div>
